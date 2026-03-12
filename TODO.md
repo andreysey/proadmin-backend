@@ -8,7 +8,7 @@
 4. **English Only**: All code, comments, AI responses, and interactions must be strictly in English.
 
 ## Phase 1: Foundation & Database 🏗️
-- [ ] Initialize NestJS project (`nest new proadmin-backend`).
+- [x] Initialize NestJS project (`proadmin-backend`).
 - [ ] Configure ESLint and Prettier (strict rules).
 - [ ] Set up a free cloud PostgreSQL database (e.g., Neon.tech or Supabase).
 - [ ] Initialize Prisma ORM (`npx prisma init`).
