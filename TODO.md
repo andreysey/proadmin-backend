@@ -9,9 +9,9 @@
 
 ## Phase 1: Foundation & Database 🏗️
 - [x] Initialize NestJS project (`proadmin-backend`).
-- [ ] Configure ESLint and Prettier (strict rules).
+- [x] Configure ESLint and Prettier (strict rules).
 - [ ] Set up a free cloud PostgreSQL database (e.g., Neon.tech or Supabase).
-- [ ] Initialize Prisma ORM (`npx prisma init`).
+- [x] Initialize Prisma ORM (`npx prisma init`).
 - [ ] Create the base `User` model in `schema.prisma` (id, email, password, role, createdAt).
 - [ ] Run the first database migration (`npx prisma migrate dev`).
 
