@@ -10,6 +10,6 @@ This workflow guides the development of new features in the NestJS backend, foll
 3. **Define DTOs**: Create Data Transfer Objects for request validation using `class-validator`.
 4. **Implement Service**: Write the business logic in the Service.
 5. **Implement Controller**: Create the endpoints in the Controller.
-6. // turbo
-7. **Build and Check**: Run `npm run build` to ensure there are no compilation errors.
-8. **Test with Postman**: Before notifying completion, verify endpoints with an API client.
+// turbo
+6. **Build and Check**: Run `npm run build` to ensure there are no compilation errors.
+7. **Test with Postman**: Before notifying completion, verify endpoints with an API client.
