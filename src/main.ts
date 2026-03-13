@@ -4,7 +4,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  console.log('DATABASE_URL is:', process.env.DATABASE_URL ? 'FOUND' : 'MISSING');
   const app = await NestFactory.create(AppModule);
 
   // Enable global validation pipe

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { JwtStrategy } from './jwt.strategy';
+
 import { PassportModule} from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -8,11 +10,11 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: "super-secret-key",
+      secret: process.env.JWT_SECRET || 'super-secret-key',
       signOptions: { expiresIn: '1d'},
     })
   ],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   exports: [AuthService]
 })

@@ -13,12 +13,12 @@
 - [x] Run the first database migration (`npx prisma migrate dev`).
 
 ## Phase 2: Authentication (JWT) 🔒
-- [ ] Install dependencies (`@nestjs/jwt`, `@nestjs/passport`, `bcrypt`).
-- [ ] Generate `AuthModule`, `AuthService`, and `AuthController`.
-- [ ] Implement password hashing with `bcrypt` (before saving to DB).
-- [ ] Implement `POST /auth/register` endpoint (Create user).
-- [ ] Implement `POST /auth/login` endpoint (Validate password & generate JWT).
-- [ ] Create a custom `JwtAuthGuard` to protect private routes.
+- [x] Install dependencies (`@nestjs/jwt`, `@nestjs/passport`, `bcrypt`).
+- [x] Generate `AuthModule`, `AuthService`, and `AuthController`.
+- [x] Implement password hashing with `bcrypt` (before saving to DB).
+- [x] Implement `POST /auth/register` endpoint (Create user).
+- [x] Implement `POST /auth/login` endpoint (Validate password & generate JWT).
+- [x] Create a custom `JwtAuthGuard` to protect private routes.
 
 ## Phase 3: Users & Role-Based Access Control (RBAC) 👥
 - [ ] Generate `UsersModule` (CRUD operations).
