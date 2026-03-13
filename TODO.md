@@ -21,12 +21,12 @@
 - [x] Create a custom `JwtAuthGuard` to protect private routes.
 
 ## Phase 3: Users & Role-Based Access Control (RBAC) 👥
-- [ ] Generate `UsersModule` (CRUD operations).
-- [ ] Implement `GET /users/me` endpoint (Get current user profile).
-- [ ] Create a `@Roles()` decorator and `RolesGuard` for access control.
-- [ ] Implement `GET /users` endpoint (ADMIN only - list all users).
-- [ ] Implement `PATCH /users/:id` endpoint (Update data; ADMIN can edit all, USER can edit self).
-- [ ] Implement `DELETE /users/:id` endpoint (Delete user, ADMIN only).
+- [x] Generate `UsersModule` (CRUD operations).
+- [x] Implement `GET /users/me` endpoint (Get current user profile).
+- [x] Create a `@Roles()` decorator and `RolesGuard` for access control.
+- [x] Implement `GET /users` endpoint (ADMIN only - list all users).
+- [x] Implement `PATCH /users/:id` endpoint (Update data; ADMIN can edit all, USER can edit self).
+- [x] Implement `DELETE /users/:id` endpoint (Delete user, ADMIN only).
 
 ## Phase 4: Frontend Integration & Polish 🚀
 - [ ] Enable CORS in NestJS (allow React frontend to make requests).
