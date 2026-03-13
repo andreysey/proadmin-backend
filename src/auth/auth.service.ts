@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -26,19 +27,43 @@ export class AuthService {
     // Hash the password (10 is the salt rounds/complexity)
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
+    // Prepare create data
+    const userData: any = {
+      email: data.email,
+      password: hashedPassword,
+      username: data.username,
+    };
+
+    // Safely assign role if valid enum value
+    if (data.role && (data.role === 'ADMIN' || data.role === 'USER')) {
+      userData.role = data.role as Role;
+    }
+
     // Save the user
-    return this.prisma.user.create({
-      data: {
-        ...data,
-        password: hashedPassword,
-      },
+    const user = await this.prisma.user.create({
+      data: userData,
     });
+
+    // Generate JWT immediately so user is logged in
+    const token = this.jwtService.sign({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    // Remove password from response
+    const { password: _, ...result } = user;
+
+    return {
+      user: result,
+      access_token: token,
+    };
   }
 
   // 2. Validate user and generate token
   async login(data: LoginDto) {
     const user = await this.prisma.user.findUnique({
-      where: { email: data.email },
+      where: { username: data.username },
     });
 
     if (!user) {

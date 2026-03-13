@@ -1,9 +1,9 @@
-import { Controller, Get, UseGuards, Req, Param, Patch, Body, Delete } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Param, Patch, Body, Delete, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -21,8 +21,13 @@ export class UsersController {
   @Roles('ADMIN')
   @Get()
   @ApiOperation({ summary: 'List all users (ADMIN only)' })
-  findAll() {
-    return this.usersService.findAll();
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
+  findAll(@Query() query: any) {
+    return this.usersService.findAll(query);
   }
 
   @Roles('ADMIN')

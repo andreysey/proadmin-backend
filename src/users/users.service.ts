@@ -5,18 +5,58 @@ import { PrismaService } from '../prisma/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll() {
-    const users = await this.prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = query;
+
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { username: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        take: Number(limit),
+        skip: Number(skip),
+        orderBy: { [sortBy]: sortOrder },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / limit),
       },
-    });
-    return users;
+    };
   }
 
   async findOne(id: string) {
@@ -25,7 +65,7 @@ export class UsersService {
       select: {
         id: true,
         email: true,
-        name: true,
+        username: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -48,7 +88,7 @@ export class UsersService {
       select: {
         id: true,
         email: true,
-        name: true,
+        username: true,
         role: true,
         createdAt: true,
         updatedAt: true,

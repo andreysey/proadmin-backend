@@ -29,10 +29,10 @@
 - [x] Implement `DELETE /users/:id` endpoint (Delete user, ADMIN only).
 
 ## Phase 4: Frontend Integration & Polish 🚀
-- [ ] Enable CORS in NestJS (allow React frontend to make requests).
-- [ ] Set up Swagger documentation (`@nestjs/swagger`) for easy API testing.
-- [ ] Integrate JWT auth into the React frontend (store token, attach to Authorization header).
-- [ ] Update frontend UI based on user role (hide admin buttons for regular users).
+- [x] Enable CORS in NestJS (allow React frontend to make requests).
+- [x] Set up Swagger documentation (`@nestjs/swagger`) for easy API testing.
+- [x] Implement pagination, searching, and sorting for the users list.
+- [x] Update login and registration to use `username` (matching frontend requirements).
 
 ## Phase 5: Deployment 🌍
 - [ ] Set up environment variables (`.env`) for production.
