@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +13,7 @@ export class AuthService {
   ) {}
 
   // 1. Register a new user
-  async register(data: any) {
+  async register(data: RegisterDto) {
     // Check if the email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
@@ -34,7 +36,7 @@ export class AuthService {
   }
 
   // 2. Validate user and generate token
-  async login(data: any) {
+  async login(data: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
