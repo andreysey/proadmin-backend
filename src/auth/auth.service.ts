@@ -106,18 +106,30 @@ export class AuthService {
     });
   }
 
-  async refreshTokens(userId: string, rt: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user || !user.refreshToken) throw new UnauthorizedException('Access Denied');
+  async refreshTokens(refreshToken: string) {
+    try {
+      const decoded = await this.jwtService.verifyAsync(refreshToken);
+      const userId = decoded.sub;
 
-    const rtMatches = await bcrypt.compare(rt, user.refreshToken);
-    if (!rtMatches) throw new UnauthorizedException('Access Denied');
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
 
-    const tokens = await this.getTokens(user.id, user.username);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
+      if (!user || !user.refreshToken) {
+        throw new UnauthorizedException('Access Denied');
+      }
 
-    return tokens;
+      const rtMatches = await bcrypt.compare(refreshToken, user.refreshToken);
+      if (!rtMatches) {
+        throw new UnauthorizedException('Access Denied');
+      }
+
+      const tokens = await this.getTokens(user.id, user.username);
+      await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+      return tokens;
+    } catch (e) {
+      throw new UnauthorizedException('Access Denied');
+    }
   }
 }

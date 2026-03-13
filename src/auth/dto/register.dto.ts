@@ -33,8 +33,14 @@ export class RegisterDto {
   @IsOptional()
   image?: string;
 
-  @ApiProperty({ example: 'USER', enum: ['USER', 'ADMIN', 'MODERATOR'], required: false })
-  @IsEnum(['USER', 'ADMIN', 'MODERATOR'])
+  @ApiProperty({ 
+    example: 'USER', 
+    enum: ['USER', 'ADMIN', 'MODERATOR', 'user', 'admin', 'moderator'], 
+    required: false 
+  })
+  @IsEnum(['USER', 'ADMIN', 'MODERATOR', 'user', 'admin', 'moderator'], {
+    message: 'role must be one of: USER, ADMIN, MODERATOR, user, admin, moderator'
+  })
   @IsOptional()
   role?: string;
 }
