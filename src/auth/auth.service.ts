@@ -28,35 +28,29 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     // Prepare create data
-    const userData: any = {
-      email: data.email,
-      password: hashedPassword,
-      username: data.username,
-    };
+    const roleValue = (['ADMIN', 'USER', 'MODERATOR'].includes(data.role?.toUpperCase() || '')
+      ? data.role!.toUpperCase()
+      : 'USER') as Role;
 
-    // Safely assign role if valid enum value
-    if (data.role && (data.role === 'ADMIN' || data.role === 'USER')) {
-      userData.role = data.role as Role;
-    }
-
-    // Save the user
     const user = await this.prisma.user.create({
-      data: userData,
+      data: {
+        email: data.email,
+        username: data.username,
+        password: hashedPassword,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        image: data.image,
+        role: roleValue,
+      },
     });
 
-    // Generate JWT immediately so user is logged in
-    const token = this.jwtService.sign({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    });
+    const tokens = await this.getTokens(user.id, user.username);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    // Remove password from response
-    const { password: _, ...result } = user;
-
+    const { password, refreshToken: _, ...result } = user;
     return {
-      user: result,
-      access_token: token,
+      ...result,
+      ...tokens,
     };
   }
 
@@ -70,16 +64,60 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Compare provided password with the hash in the DB
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate JWT
+    const tokens = await this.getTokens(user.id, user.username);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+    const { password, refreshToken: _, ...result } = user;
     return {
-      access_token: this.jwtService.sign({ userId: user.id, email: user.email, role: user.role }),
+      ...result,
+      ...tokens,
     };
+  }
+
+  async getTokens(userId: string, username: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        { sub: userId, username },
+        { expiresIn: '1h' },
+      ),
+      this.jwtService.signAsync(
+        { sub: userId, username },
+        { expiresIn: '7d' },
+      ),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string) {
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: hashedRefreshToken },
+    });
+  }
+
+  async refreshTokens(userId: string, rt: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user || !user.refreshToken) throw new UnauthorizedException('Access Denied');
+
+    const rtMatches = await bcrypt.compare(rt, user.refreshToken);
+    if (!rtMatches) throw new UnauthorizedException('Access Denied');
+
+    const tokens = await this.getTokens(user.id, user.username);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+    return tokens;
   }
 }

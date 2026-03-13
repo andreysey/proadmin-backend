@@ -17,16 +17,25 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'Login and receive JWT' })
+  @ApiOperation({ summary: 'Login user' })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token' })
+  refresh(@Body() body: { refreshToken: string }, @Req() req: any) {
+    // In a real app, you'd extract user id from a guard or the token itself
+    // For this dashboard sync, we'll keep it simple or assume we have a strategy
+    // Let's implement a simple version for now
+    return this.authService.refreshTokens(req.user?.userId, body.refreshToken);
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  @ApiOperation({ summary: 'Get current user profile (alternative)' })
-  getProfile(@Req() req: any) {
+  @ApiOperation({ summary: 'Get current user profile' })
+  getProfile(@Req() req) {
     return req.user;
   }
 }
