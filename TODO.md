@@ -1,11 +1,8 @@
 # ProAdmin Backend - NestJS Blueprint
 
-## AI Collaboration Rules (Strictly Enforced)
-
-1. **The "Why?" Rule**: Never blindly copy-paste. Before accepting a generated module (e.g., AuthGuard), the user must understand what every line does. Provide brief explanations for complex logic.
-2. **Postman / Insomnia First**: Before integrating any endpoint with the React frontend, independently test it using an API client to verify JSON responses and error handling (e.g., 401 Unauthorized).
-3. **Architecture Over Code**: Do not dump everything into a single file. Strictly follow the NestJS modular architecture (Controller -> Service -> Module) and adhere to FSD/GRASP principles for maintainability.
-4. **English Only**: All code, comments, AI responses, and interactions must be strictly in English.
+## Project Rules
+> [!NOTE]
+> Project rules and workflows are now managed in the `.agents/` directory for better context persistent. See `.agents/rules` and `.agents/workflows`.
 
 ## Phase 1: Foundation & Database 🏗️
 - [x] Initialize NestJS project (`proadmin-backend`).
