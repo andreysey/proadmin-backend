@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private activityLog: ActivityLogService,
+  ) {}
 
   async getStats() {
     const [totalUsers, adminCount, lastMonthUsers] = await Promise.all([
@@ -73,24 +77,14 @@ export class AnalyticsService {
   }
 
   async getRecent() {
-    const latestUsers = await this.prisma.user.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        username: true,
-        firstName: true,
-        lastName: true,
-        createdAt: true,
-      },
-    });
+    const logs = await this.activityLog.getRecent(10);
 
-    return latestUsers.map((user) => ({
-      id: user.id,
-      type: 'user_signup',
-      title: 'New user registered',
-      description: `${user.firstName || ''} ${user.lastName || ''} (@${user.username}) joined`,
-      timestamp: user.createdAt.toISOString(),
+    return logs.map((log) => ({
+      id: log.id,
+      type: log.type,
+      title: log.title,
+      description: log.description,
+      timestamp: log.createdAt.toISOString(),
     }));
   }
 

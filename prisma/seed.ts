@@ -35,27 +35,56 @@ async function main() {
 
   console.log('Admin user ensured:', admin.email);
 
-  // Generate 20 test users
+  // Generate 300 test users
+  const firstNames = ['James', 'Mary', 'Robert', 'Patricia', 'John', 'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth', 'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica', 'Thomas', 'Sarah', 'Charles', 'Karen'];
+  const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin'];
   const roles = ['USER', 'ADMIN', 'MODERATOR'];
-  for (let i = 1; i <= 20; i++) {
+  
+  console.log('Seeding 300 users...');
+  
+  for (let i = 1; i <= 300; i++) {
     const role = roles[i % roles.length];
-    const email = `user${i}@example.com`;
-    await prisma.user.upsert({
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const username = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${i}`;
+    const email = `${username}@example.com`;
+    
+    // Random date within last 30 days, definitely in the past
+    const now = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const createdAt = new Date(thirtyDaysAgo.getTime() + Math.random() * (now.getTime() - thirtyDaysAgo.getTime()));
+
+    const user = await prisma.user.upsert({
       where: { email },
-      update: {},
+      update: { createdAt },
       create: {
         email,
-        username: `user_tester_${i}`,
+        username,
         password: commonPassword,
-        firstName: `TestFirst${i}`,
-        lastName: `TestLast${i}`,
+        firstName,
+        lastName,
         role: role as any,
         image: `https://i.pravatar.cc/150?u=${email}`,
+        createdAt,
       },
     });
+
+    // Also seed activity log for registrations
+    await prisma.activityLog.create({
+      data: {
+        type: 'user_signup',
+        title: 'New user registered',
+        description: `${firstName} ${lastName} (@${username}) joined the platform`,
+        userId: user.id,
+        createdAt,
+      },
+    });
+
+    if (i % 50 === 0) console.log(`Seeded ${i} users...`);
   }
 
-  console.log('Successfully seeded 20 test users.');
+  console.log('Successfully seeded 300 test users and activity logs.');
 }
 
 main()

@@ -6,12 +6,13 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { ActivityLogModule } from './activity-log/activity-log.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }), // Load .env globally
     PrismaModule, 
-    AuthModule, UsersModule, AnalyticsModule
+    AuthModule, UsersModule, AnalyticsModule, ActivityLogModule
   ],
   controllers: [AppController],
   providers: [AppService],

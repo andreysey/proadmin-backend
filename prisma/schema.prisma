@@ -31,3 +31,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  type        String   // 'user_registered', 'user_updated', 'user_deleted', 'user_login'
+  title       String
+  description String
+  userId      String?
+  createdAt   DateTime @default(now())
+}

@@ -5,12 +5,14 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Role } from '@prisma/client';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private activityLog: ActivityLogService,
   ) {}
 
   // 1. Register a new user
@@ -47,6 +49,13 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.username, user.role);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
+    await this.activityLog.log(
+      'user_signup',
+      'New user registered',
+      `${user.firstName || ''} ${user.lastName || ''} (@${user.username}) joined the platform`,
+      user.id,
+    );
+
     const { password, refreshToken: _, ...result } = user;
     return {
       ...result,
@@ -72,6 +81,13 @@ export class AuthService {
 
     const tokens = await this.getTokens(user.id, user.username, user.role);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+    await this.activityLog.log(
+      'user_login',
+      'User logged in',
+      `User @${user.username} successfully authenticated`,
+      user.id,
+    );
 
     const { password, refreshToken: _, ...result } = user;
     return {

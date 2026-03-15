@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto, BulkUpdateRoleDto } from './dto/user-update.dto';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private activityLog: ActivityLogService,
+  ) {}
 
   async findAll(query: {
     page?: number;
@@ -91,7 +95,9 @@ export class UsersService {
   }
 
   async update(id: string, data: UpdateUserDto) {
-    return this.prisma.user.update({
+    const currentUser = await this.prisma.user.findUnique({ where: { id } });
+
+    const user = await this.prisma.user.update({
       where: { id },
       data,
       select: {
@@ -107,25 +113,64 @@ export class UsersService {
         updatedAt: true,
       },
     });
+
+    if (data.role && currentUser && currentUser.role !== data.role) {
+      await this.activityLog.log(
+        'user_updated',
+        'User role updated',
+        `Role for @${user.username} was changed from ${currentUser.role} to ${data.role}`,
+        user.id,
+      );
+    } else {
+      await this.activityLog.log(
+        'user_updated',
+        'User profile updated',
+        `Profile for @${user.username} was updated`,
+        user.id,
+      );
+    }
+
+    return user;
   }
 
   async bulkUpdateRole(bulkUpdateRoleDto: BulkUpdateRoleDto) {
     const { ids, role } = bulkUpdateRoleDto;
 
-    return this.prisma.$transaction(
+    const results = await this.prisma.$transaction(
       ids.map((id) =>
         this.prisma.user.update({
           where: { id },
           data: { role },
-          select: { id: true, role: true },
+          select: { id: true, username: true, role: true },
         })
       )
     );
+
+    // Log each role update
+    for (const user of results) {
+      await this.activityLog.log(
+        'user_updated',
+        'User role updated',
+        `Role for @${user.username} changed to ${user.role} (Bulk Update)`,
+        user.id,
+      );
+    }
+
+    return results;
   }
 
   async remove(id: string) {
-    return this.prisma.user.delete({
+    const user = await this.prisma.user.delete({
       where: { id },
     });
+
+    await this.activityLog.log(
+      'user_delete',
+      'User deleted',
+      `Account for @${user.username} (#${user.displayId}) was removed`,
+      user.id,
+    );
+
+    return user;
   }
 }
