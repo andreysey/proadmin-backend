@@ -27,6 +27,8 @@
 - [x] Implement `GET /users` endpoint (ADMIN only - list all users).
 - [x] Implement `PATCH /users/:id` endpoint (Update data; ADMIN can edit all, USER can edit self).
 - [x] Implement `DELETE /users/:id` endpoint (Delete user, ADMIN only).
+- [x] Implement `PATCH /users/bulk-update` endpoint (Efficient batch role changes).
+- [x] Enforce strict DTO validation for all User operations.
 
 ## Phase 4: Frontend Integration & Polish 🚀
 - [x] Enable CORS in NestJS (allow React frontend to make requests).

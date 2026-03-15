@@ -44,7 +44,7 @@ export class AuthService {
       },
     });
 
-    const tokens = await this.getTokens(user.id, user.username);
+    const tokens = await this.getTokens(user.id, user.username, user.role);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     const { password, refreshToken: _, ...result } = user;
@@ -70,7 +70,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.getTokens(user.id, user.username);
+    const tokens = await this.getTokens(user.id, user.username, user.role);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     const { password, refreshToken: _, ...result } = user;
@@ -80,16 +80,11 @@ export class AuthService {
     };
   }
 
-  async getTokens(userId: string, username: string) {
+  async getTokens(userId: string, username: string, role: string) {
+    const payload = { sub: userId, username, role };
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { sub: userId, username },
-        { expiresIn: '1h' },
-      ),
-      this.jwtService.signAsync(
-        { sub: userId, username },
-        { expiresIn: '7d' },
-      ),
+      this.jwtService.signAsync(payload, { expiresIn: '1h' }),
+      this.jwtService.signAsync(payload, { expiresIn: '7d' }),
     ]);
 
     return {
@@ -124,7 +119,7 @@ export class AuthService {
         throw new UnauthorizedException('Access Denied');
       }
 
-      const tokens = await this.getTokens(user.id, user.username);
+      const tokens = await this.getTokens(user.id, user.username, user.role);
       await this.updateRefreshToken(user.id, tokens.refreshToken);
 
       return tokens;

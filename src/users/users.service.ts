@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateUserDto, BulkUpdateRoleDto } from './dto/user-update.dto';
 
 @Injectable()
 export class UsersService {
@@ -85,9 +86,7 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, data: any) {
-    // Note: Password update should ideally stay in AuthService for security,
-    // but we can add simple field updates here.
+  async update(id: string, data: UpdateUserDto) {
     return this.prisma.user.update({
       where: { id },
       data,
@@ -95,11 +94,28 @@ export class UsersService {
         id: true,
         email: true,
         username: true,
+        firstName: true,
+        lastName: true,
+        image: true,
         role: true,
         createdAt: true,
         updatedAt: true,
       },
     });
+  }
+
+  async bulkUpdateRole(bulkUpdateRoleDto: BulkUpdateRoleDto) {
+    const { ids, role } = bulkUpdateRoleDto;
+
+    return this.prisma.$transaction(
+      ids.map((id) =>
+        this.prisma.user.update({
+          where: { id },
+          data: { role },
+          select: { id: true, role: true },
+        })
+      )
+    );
   }
 
   async remove(id: string) {

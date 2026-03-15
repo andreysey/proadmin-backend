@@ -3,7 +3,8 @@ import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { UpdateUserDto, BulkUpdateRoleDto } from './dto/user-update.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -16,6 +17,14 @@ export class UsersController {
   @ApiOperation({ summary: 'Get current user profile' })
   getMe(@Req() req: any) {
     return this.usersService.findOne(req.user.userId);
+  }
+
+  @Roles('ADMIN')
+  @Patch('bulk-update')
+  @ApiOperation({ summary: 'Bulk update user roles (ADMIN only)' })
+  @ApiBody({ type: BulkUpdateRoleDto })
+  bulkUpdate(@Body() bulkUpdateRoleDto: BulkUpdateRoleDto) {
+    return this.usersService.bulkUpdateRole(bulkUpdateRoleDto);
   }
 
   @Roles('ADMIN')
@@ -40,7 +49,7 @@ export class UsersController {
   @Roles('ADMIN')
   @Patch(':id')
   @ApiOperation({ summary: 'Update user (ADMIN only)' })
-  update(@Param('id') id: string, @Body() updateUserDto: any) {
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
 
