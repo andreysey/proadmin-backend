@@ -39,6 +39,7 @@ export class UsersService {
         orderBy: { [sortBy]: sortOrder },
         select: {
           id: true,
+          displayId: true,
           email: true,
           username: true,
           firstName: true,
@@ -68,6 +69,7 @@ export class UsersService {
       where: { id },
       select: {
         id: true,
+        displayId: true,
         email: true,
         username: true,
         firstName: true,
@@ -92,6 +94,7 @@ export class UsersService {
       data,
       select: {
         id: true,
+        displayId: true,
         email: true,
         username: true,
         firstName: true,
