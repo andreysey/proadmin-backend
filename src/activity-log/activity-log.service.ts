@@ -37,6 +37,12 @@ export class ActivityLogService {
       this.prisma.activityLog.count(),
     ]);
 
-    return { items, total };
+    return {
+      items: items.map((item) => ({
+        ...item,
+        timestamp: item.createdAt.toISOString(),
+      })),
+      total,
+    };
   }
 }

@@ -77,7 +77,7 @@ export class AnalyticsService {
   }
 
   async getRecent() {
-    const logs = await this.activityLog.getRecent(10);
+    const logs = await this.activityLog.getRecent(4);
 
     return logs.map((log) => ({
       id: log.id,
