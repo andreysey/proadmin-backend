@@ -17,6 +17,7 @@ export class UsersService {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
+    const ALLOWED_SORT_FIELDS = ['displayId', 'username', 'email', 'role', 'createdAt'];
     const {
       page = 1,
       limit = 10,
@@ -25,6 +26,7 @@ export class UsersService {
       sortOrder = 'desc',
     } = query;
 
+    const finalSortBy = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : 'createdAt';
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -42,7 +44,7 @@ export class UsersService {
         where,
         take: Number(limit),
         skip: Number(skip),
-        orderBy: { [sortBy]: sortOrder },
+        orderBy: { [finalSortBy]: sortOrder },
         select: {
           id: true,
           displayId: true,
