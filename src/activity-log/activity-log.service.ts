@@ -26,4 +26,17 @@ export class ActivityLogService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async findAll(skip = 0, take = 10) {
+    const [items, total] = await Promise.all([
+      this.prisma.activityLog.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.activityLog.count(),
+    ]);
+
+    return { items, total };
+  }
 }
