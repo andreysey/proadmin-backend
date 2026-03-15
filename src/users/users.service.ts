@@ -25,9 +25,11 @@ export class UsersService {
 
     const where: any = {};
     if (search) {
+      const isNumeric = !isNaN(Number(search));
       where.OR = [
         { username: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
+        ...(isNumeric ? [{ displayId: Number(search) }] : []),
       ];
     }
 

@@ -1,46 +1,97 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AnalyticsService {
+  constructor(private prisma: PrismaService) {}
+
   async getStats() {
+    const [totalUsers, adminCount, lastMonthUsers] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { role: 'ADMIN' } }),
+      this.prisma.user.count({
+        where: {
+          createdAt: {
+            gt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          },
+        },
+      }),
+    ]);
+
+    // Calculate growth (relative to current total - simplified)
+    const monthlyGrowth = totalUsers > 0 ? (lastMonthUsers / totalUsers) * 100 : 0;
+
     return {
-      totalUsers: 1250,
-      activeNow: 42,
-      totalRevenue: 54320,
-      monthlyGrowth: 12.5,
+      totalUsers,
+      activeNow: Math.floor(Math.random() * 10) + 1, // Realistic mock for now
+      totalRevenue: totalUsers * 42, // Dummy logic: $42 per user
+      monthlyGrowth: parseFloat(monthlyGrowth.toFixed(1)),
     };
   }
 
   async getActivity() {
+    // Fetch user registrations for the last 7 days
+    const now = new Date();
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(now.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }).reverse();
+
+    const activityData = await Promise.all(
+      last7Days.map(async (date) => {
+        const nextDate = new Date(date);
+        nextDate.setDate(date.getDate() + 1);
+
+        const count = await this.prisma.user.count({
+          where: {
+            createdAt: {
+              gte: date,
+              lt: nextDate,
+            },
+          },
+        });
+
+        return {
+          timestamp: date.toISOString(),
+          value: count,
+        };
+      }),
+    );
+
     return [
       {
         type: 'new_users',
-        data: this.generateMockData(20, 100),
+        data: activityData,
       },
       {
         type: 'revenue',
-        data: this.generateMockData(500, 2000),
+        data: this.generateMockSeries(200, 500),
       },
     ];
   }
 
   async getRecent() {
-    return [
-      {
-        id: '1',
-        type: 'user_signup',
-        title: 'New user registered',
-        description: 'John Doe joined ProAdmin',
-        timestamp: new Date().toISOString(),
+    const latestUsers = await this.prisma.user.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        createdAt: true,
       },
-      {
-        id: '2',
-        type: 'payment_success',
-        title: 'Payment received',
-        description: '$120.00 from Jane Smith',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-      },
-    ];
+    });
+
+    return latestUsers.map((user) => ({
+      id: user.id,
+      type: 'user_signup',
+      title: 'New user registered',
+      description: `${user.firstName || ''} ${user.lastName || ''} (@${user.username}) joined`,
+      timestamp: user.createdAt.toISOString(),
+    }));
   }
 
   async getRevenue() {
@@ -52,10 +103,10 @@ export class AnalyticsService {
     ];
   }
 
-  private generateMockData(min: number, max: number) {
+  private generateMockSeries(min: number, max: number) {
     return Array.from({ length: 7 }, (_, i) => ({
       timestamp: new Date(Date.now() - i * 86400000).toISOString(),
       value: Math.floor(Math.random() * (max - min + 1) + min),
-    }));
+    })).reverse();
   }
 }
