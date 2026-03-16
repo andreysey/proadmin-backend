@@ -9,59 +9,79 @@ export class AnalyticsService {
     private activityLog: ActivityLogService,
   ) {}
 
-  async getStats() {
-    const [totalUsers, adminCount, lastMonthUsers] = await Promise.all([
+  private getStartDate(range?: string): Date {
+    const now = new Date();
+    switch (range) {
+      case '24h':
+        return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      case '7d':
+        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      case '30d':
+      default:
+        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  async getStats(dateRange?: string) {
+    const startDate = this.getStartDate(dateRange);
+
+    const [totalUsers, adminCount, recentUsers] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.user.count({ where: { role: 'ADMIN' } }),
       this.prisma.user.count({
         where: {
           createdAt: {
-            gt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            gte: startDate,
           },
         },
       }),
     ]);
 
-    // Calculate growth (relative to current total - simplified)
-    const monthlyGrowth = totalUsers > 0 ? (lastMonthUsers / totalUsers) * 100 : 0;
+    // Calculate growth (relative to current total)
+    const growth = totalUsers > 0 ? (recentUsers / totalUsers) * 100 : 0;
 
     return {
       totalUsers,
-      activeNow: Math.floor(Math.random() * 10) + 1, // Realistic mock for now
-      totalRevenue: totalUsers * 42, // Dummy logic: $42 per user
-      monthlyGrowth: parseFloat(monthlyGrowth.toFixed(1)),
+      activeNow: Math.floor(Math.random() * 10) + 1,
+      totalRevenue: totalUsers * 42,
+      monthlyGrowth: parseFloat(growth.toFixed(1)), // Renamed from monthlyGrowth to just be growth based on range? 
+      // Actually frontend expects monthlyGrowth, let's keep the key but use the filtered data
     };
   }
 
-  async getActivity() {
-    // Fetch user registrations for the last 7 days
+  async getActivity(dateRange: string = '7d') {
     const now = new Date();
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(now.getDate() - i);
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }).reverse();
-
+    const startDate = this.getStartDate(dateRange);
+    
+    // Determine interval (number of days to show)
+    const days = dateRange === '24h' ? 1 : dateRange === '30d' ? 30 : 7;
+    
     const activityData = await Promise.all(
-      last7Days.map(async (date) => {
-        const nextDate = new Date(date);
-        nextDate.setDate(date.getDate() + 1);
+      Array.from({ length: days }, (_, i) => {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      })
+        .reverse()
+        .map(async (date) => {
+          const nextDate = new Date(date);
+          nextDate.setDate(date.getDate() + 1);
 
-        const count = await this.prisma.user.count({
-          where: {
-            createdAt: {
-              gte: date,
-              lt: nextDate,
+          const count = await this.prisma.user.count({
+            where: {
+              createdAt: {
+                gte: date,
+                lt: nextDate,
+              },
             },
-          },
-        });
+          });
 
-        return {
-          timestamp: date.toISOString(),
-          value: count,
-        };
-      }),
+          return {
+            timestamp: date.toISOString(),
+            value: count,
+          };
+        }),
     );
 
     return [
@@ -71,13 +91,26 @@ export class AnalyticsService {
       },
       {
         type: 'revenue',
-        data: this.generateMockSeries(200, 500),
+        data: this.generateMockSeries(days),
       },
     ];
   }
 
-  async getRecent() {
-    const logs = await this.activityLog.getRecent(4);
+  async getRecent(dateRange?: string) {
+    const startDate = this.getStartDate(dateRange);
+    
+    // We filter logs but still limit to a reasonable number for the "Recent" view
+    const logs = await this.prisma.activityLog.findMany({
+      where: {
+        createdAt: {
+          gte: startDate,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 4,
+    });
 
     return logs.map((log) => ({
       id: log.id,
@@ -88,7 +121,8 @@ export class AnalyticsService {
     }));
   }
 
-  async getRevenue() {
+  async getRevenue(dateRange?: string) {
+    // For now keeping demo data, but we could filter it if we had real revenue records
     return [
       { month: 'Jan', revenue: 4000, orders: 120 },
       { month: 'Feb', revenue: 3000, orders: 90 },
@@ -97,10 +131,10 @@ export class AnalyticsService {
     ];
   }
 
-  private generateMockSeries(min: number, max: number) {
-    return Array.from({ length: 7 }, (_, i) => ({
+  private generateMockSeries(days: number) {
+    return Array.from({ length: days }, (_, i) => ({
       timestamp: new Date(Date.now() - i * 86400000).toISOString(),
-      value: Math.floor(Math.random() * (max - min + 1) + min),
+      value: Math.floor(Math.random() * (500 - 200 + 1) + 200),
     })).reverse();
   }
 }

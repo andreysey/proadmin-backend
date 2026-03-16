@@ -1,6 +1,6 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Query } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Analytics')
@@ -12,25 +12,29 @@ export class AnalyticsController {
 
   @Get('stats')
   @ApiOperation({ summary: 'Get dashboard overall statistics' })
-  getStats() {
-    return this.analyticsService.getStats();
+  @ApiQuery({ name: 'dateRange', required: false, enum: ['24h', '7d', '30d'] })
+  getStats(@Query('dateRange') dateRange?: string) {
+    return this.analyticsService.getStats(dateRange);
   }
 
   @Get('activity')
   @ApiOperation({ summary: 'Get user activity/growth data for charts' })
-  getActivity() {
-    return this.analyticsService.getActivity();
+  @ApiQuery({ name: 'dateRange', required: false, enum: ['24h', '7d', '30d'] })
+  getActivity(@Query('dateRange') dateRange?: string) {
+    return this.analyticsService.getActivity(dateRange);
   }
 
   @Get('recent')
   @ApiOperation({ summary: 'Get recent system events' })
-  getRecent() {
-    return this.analyticsService.getRecent();
+  @ApiQuery({ name: 'dateRange', required: false, enum: ['24h', '7d', '30d'] })
+  getRecent(@Query('dateRange') dateRange?: string) {
+    return this.analyticsService.getRecent(dateRange);
   }
 
   @Get('revenue')
   @ApiOperation({ summary: 'Get revenue data for bar charts' })
-  getRevenue() {
-    return this.analyticsService.getRevenue();
+  @ApiQuery({ name: 'dateRange', required: false, enum: ['24h', '7d', '30d'] })
+  getRevenue(@Query('dateRange') dateRange?: string) {
+    return this.analyticsService.getRevenue(dateRange);
   }
 }
