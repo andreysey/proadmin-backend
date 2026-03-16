@@ -16,7 +16,7 @@ export class ActivityLogController {
     @Query('take') take?: string,
   ) {
     const skipNum = skip ? parseInt(skip, 10) : 0;
-    const takeNum = take ? parseInt(take, 10) : 10;
+    const takeNum = take ? parseInt(take, 10) : 50;
     return this.activityLogService.findAll(skipNum, takeNum);
   }
 }
