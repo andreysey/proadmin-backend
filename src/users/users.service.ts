@@ -175,4 +175,19 @@ export class UsersService {
 
     return user;
   }
+
+  async exportAll() {
+    return this.prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        displayId: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+  }
 }

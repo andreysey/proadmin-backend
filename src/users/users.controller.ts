@@ -40,6 +40,13 @@ export class UsersController {
   }
 
   @Roles('ADMIN')
+  @Get('export')
+  @ApiOperation({ summary: 'Export all users (ADMIN only)' })
+  export() {
+    return this.usersService.exportAll();
+  }
+
+  @Roles('ADMIN')
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID (ADMIN only)' })
   findOne(@Param('id') id: string) {
