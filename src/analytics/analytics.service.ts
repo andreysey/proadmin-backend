@@ -118,6 +118,7 @@ export class AnalyticsService {
       title: log.title,
       description: log.description,
       timestamp: log.createdAt.toISOString(),
+      metadata: log.metadata,
     }));
   }
 

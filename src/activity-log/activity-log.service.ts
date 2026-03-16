@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ActivityLogService {
   constructor(private prisma: PrismaService) {}
 
-  async log(type: string, title: string, description: string, userId?: string) {
+  async log(type: string, title: string, description: string, userId?: string, metadata?: any) {
     try {
       return await this.prisma.activityLog.create({
         data: {
@@ -13,6 +13,7 @@ export class ActivityLogService {
           title,
           description,
           userId,
+          metadata,
         },
       });
     } catch (error) {

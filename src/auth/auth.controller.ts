@@ -12,14 +12,18 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  register(@Body() registerDto: RegisterDto, @Req() req) {
+    const userAgent = req.headers['user-agent'];
+    const ip = req.ip;
+    return this.authService.register(registerDto, { userAgent, ip });
   }
 
   @Post('login')
   @ApiOperation({ summary: 'Login user' })
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  login(@Body() loginDto: LoginDto, @Req() req) {
+    const userAgent = req.headers['user-agent'];
+    const ip = req.ip;
+    return this.authService.login(loginDto, { userAgent, ip });
   }
 
   @Post('refresh')

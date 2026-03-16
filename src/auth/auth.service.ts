@@ -16,7 +16,7 @@ export class AuthService {
   ) {}
 
   // 1. Register a new user
-  async register(data: RegisterDto) {
+  async register(data: RegisterDto, info?: { userAgent?: string; ip?: string }) {
     // Check if the email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
@@ -54,6 +54,7 @@ export class AuthService {
       'New user registered',
       `${user.firstName || ''} ${user.lastName || ''} (@${user.username}) joined the platform`,
       user.id,
+      info, // Pass metadata
     );
 
     const { password, refreshToken: _, ...result } = user;
@@ -64,7 +65,7 @@ export class AuthService {
   }
 
   // 2. Validate user and generate token
-  async login(data: LoginDto) {
+  async login(data: LoginDto, info?: { userAgent?: string; ip?: string }) {
     const user = await this.prisma.user.findUnique({
       where: { username: data.username },
     });
@@ -87,6 +88,7 @@ export class AuthService {
       'User logged in',
       `User @${user.username} successfully authenticated`,
       user.id,
+      info, // Pass metadata
     );
 
     const { password, refreshToken: _, ...result } = user;
