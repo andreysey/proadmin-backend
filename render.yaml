@@ -12,6 +12,6 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: http://localhost:5173 # Update this in Render Dashboard after frontend deployment
+        value: https://proadmin-dashboard.vercel.app
       - key: PORT
         value: 3000
