@@ -2,11 +2,11 @@
 // npm install --save-dev prisma dotenv
 import { join } from "node:path";
 import { defineConfig } from "prisma/config";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { parse } from "dotenv";
 
 const envPath = join(__dirname, ".env");
-const envConfig = parse(readFileSync(envPath));
+const envConfig = existsSync(envPath) ? parse(readFileSync(envPath)) : {};
 
 export default defineConfig({
   schema: join(__dirname, "prisma/schema.prisma"),
