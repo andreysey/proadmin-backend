@@ -37,7 +37,8 @@
 - [x] Update login and registration to use `username` (matching frontend requirements).
 
 ## Phase 5: Deployment 🌍
-- [ ] Set up environment variables (`.env`) for production.
-- [ ] Deploy PostgreSQL database (if not already using Neon/Supabase cloud).
+- [x] Set up environment variables (`.env`) for production.
+- [x] Create a `render.yaml` blueprint for Render.com.
+- [x] Implement health check endpoint and parameterized CORS.
 - [ ] Deploy NestJS application to Render.com (Free Tier).
 - [ ] Update CORS settings to accept requests from the deployed Vercel frontend domain.
