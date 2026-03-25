@@ -40,5 +40,5 @@
 - [x] Set up environment variables (`.env`) for production.
 - [x] Create a `render.yaml` blueprint for Render.com.
 - [x] Implement health check endpoint and parameterized CORS.
-- [ ] Deploy NestJS application to Render.com (Free Tier).
+- [/] Deploy NestJS application to Render.com (Free Tier) - Build Successful 🎉
 - [ ] Update CORS settings to accept requests from the deployed Vercel frontend domain.
